@@ -1,0 +1,10 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: managed-aws-rds
+spec:
+  destination:
+    name: managed-aws-rds
+  sources:
+    - name: product-api
+      action: allow

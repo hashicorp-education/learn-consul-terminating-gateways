@@ -1,0 +1,10 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: managed-aws-rds
+spec:
+  protocol: tcp
+  destination:
+    addresses:
+      - "postgresql–instance1.123456789012.us-east-1.rds.amazonaws.com"
+    port: 5432
