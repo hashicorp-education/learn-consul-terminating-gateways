@@ -24,3 +24,11 @@ output "kubernetes_cluster_endpoint" {
 output "kubernetes_cluster_id" {
   value = local.name
 }
+
+################################################################################
+# Database
+################################################################################
+
+output "aws_rds_endpoint" {
+  value = data.aws_db_instance.database.address
+}

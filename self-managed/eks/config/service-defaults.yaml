@@ -6,5 +6,5 @@ spec:
   protocol: tcp
   destination:
     addresses:
-      - "postgresql–instance1.123456789012.us-east-1.rds.amazonaws.com"
+      - "learn-consul-wu27.cvjehh8zzfhg.us-west-2.rds.amazonaws.com"
     port: 5432

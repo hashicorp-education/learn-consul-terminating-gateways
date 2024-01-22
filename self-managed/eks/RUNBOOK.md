@@ -16,18 +16,43 @@ export CONSUL_HTTP_SSL_VERIFY=false
 # Notice that Consul services exist
 consul catalog services
 
-# Update proxy defaults to enable proxy access logs
-kubectl apply --filename config/proxy-defaults.yaml
+# Update Helm chart
+consul-k8s upgrade -config-file=helm/consul-v2-terminating-gw.yaml
 
-# Redeploy HashiCups with updated proxies
-kubectl rollout restart deployment --namespace default
+# Get the AWS RDS private DNS address
+terraform output -raw aws_rds_endpoint
+
+# Put private DNS address in config/service-defaults.yaml and save the file
+
+# Create service defaults
+kubectl apply --filename config/service-defaults.yaml
+
+# Create ACL policy
+consul acl policy create -name "managed-aws-rds-write-policy" -rules @config/write-acl-policy.hcl
+
+# Obtain ID of terminating gateway role
+consul acl role list -format=json | jq --raw-output '[.[] | select(.Name | endswith("-terminating-gateway-acl-role"))] | if (. | length) == 1 then (. | first | .ID) else "Unable to determine the role ID because there are multiple roles matching this name.\n" | halt_error end'
+
+# Update terminating GW with new ACL policy
+consul acl role update -id <role id> -policy-name managed-aws-rds-write-policy
+consul acl role update -id 337d317d-41b5-c2f0-0ecd-6624616814af -policy-name managed-aws-rds-write-policy
+
+# Apply terminating gateway configuration
+kubectl apply --filename config/terminating-gateway.yaml
+
+# Create intention to allow communication from product-api to AWS RDS instance
+kubectl apply --filename config/service-intentions.yaml
+
+# TROUBLESHOOTING CONTAINER
+kubectl exec --stdin --tty deploy/public-api -- /bin/sh
+
+# Redeploy product-api with new managed AWS RDS transparent proxy address
+kubectl delete -f hashicups/product-api.yaml && \
+kubectl apply -f hashicups/product-api.yaml
 
 # Go to API gateway URL and explore HashiCups
 export CONSUL_APIGW_ADDR=http://$(kubectl get svc/api-gateway -o json | jq -r '.status.loadBalancer.ingress[0].hostname') && \
 echo $CONSUL_APIGW_ADDR
-
-# Go to Grafana URL and check out dashboards
-export GRAFANA_ACCESS_LOGS_DASHBOARD=http://$(kubectl get svc/grafana --namespace observability -o json | jq -r '.status.loadBalancer.ingress[0].hostname')/d/access-logs-events-and-errors/ && echo $GRAFANA_ACCESS_LOGS_DASHBOARD
 
 # Check out Consul (optional)
 echo $CONSUL_HTTP_ADDR && echo $CONSUL_HTTP_TOKEN

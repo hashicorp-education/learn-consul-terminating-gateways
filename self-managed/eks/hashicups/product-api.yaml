@@ -62,6 +62,7 @@ spec:
         app: product-api
       annotations:
         consul.hashicorp.com/connect-inject: "true"
+        #consul.hashicorp.com/connect-service-upstreams: "managed-aws-rds:5432"
     spec:
       serviceAccountName: product-api
       volumes:

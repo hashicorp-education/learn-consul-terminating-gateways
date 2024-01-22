@@ -37,19 +37,13 @@ variable "datacenter" {
 }
 
 ################################################################################
-# Observability
+# Database
 ################################################################################
 
-variable "loki_chart_version" {
+variable "postgres_version" {
   type        = string
-  description = "The prometheus Helm chart version to use"
-  default     = "2.9.11"
-}
-
-variable "grafana_chart_version" {
-  type        = string
-  description = "The grafana Helm chart version to use"
-  default     = "7.0.8"
+  description = "The postgres engine version to use"
+  default     = "14"
 }
 
 ################################################################################
