@@ -1,0 +1,32 @@
+{
+    "Node": "AWS RDS",
+    "Address": "learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com",
+    "NodeMeta": {
+      "external-node": "true",
+      "external-probe": "true"
+    },
+    "Service": {
+      "ID": "managed-aws-rds-1",
+      "Service": "managed-aws-rds",
+      "Tags": ["external", "postgres"],
+      "Port": 5432
+    },
+    "Check": {
+        "Node": "AWS RDS",
+        "CheckID": "service:managed-aws-rds",
+        "Name": "managed-aws-rds health check",
+        "Notes": "TCP port 5432 health check",
+        "Status": "passing",
+        "ServiceID": "managed-aws-rds-1",
+        "ServiceTags": [
+            "external"
+          ],
+        "Definition": {
+          "Method": "GET",
+          "TCP": "learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com:5432",
+          "Interval": "5s",
+          "Timeout": "1s",
+          "DeregisterCriticalServiceAfter": "30s"
+        }
+    }
+}

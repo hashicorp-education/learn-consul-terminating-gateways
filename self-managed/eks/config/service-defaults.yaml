@@ -6,5 +6,5 @@ spec:
   protocol: tcp
   destination:
     addresses:
-      - "learn-consul-wu27.cvjehh8zzfhg.us-west-2.rds.amazonaws.com"
+      - "learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com"
     port: 5432

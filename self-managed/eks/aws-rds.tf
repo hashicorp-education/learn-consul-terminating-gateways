@@ -1,5 +1,5 @@
 data "aws_db_instance" "database" {
-  db_instance_identifier = local.name
+  db_instance_identifier = aws_db_instance.database.identifier
 }
 
 resource "aws_db_instance" "database" {
@@ -12,7 +12,6 @@ resource "aws_db_instance" "database" {
   username             = "postgres"
   password             = "password"
   port                 = 5432
-  #parameter_group_name = "default.mysql5.7"
   skip_final_snapshot  = true
   multi_az             = false
 
