@@ -41,19 +41,6 @@ spec:
 apiVersion: consul.hashicorp.com/v1alpha1
 kind: ServiceIntentions
 metadata:
-  name: product-api-db
-  namespace: default
-# Allow traffic from product-api to product-api-db
-spec:
-  destination:
-    name: product-api-db
-  sources:
-    - name: product-api
-      action: allow
----
-apiVersion: consul.hashicorp.com/v1alpha1
-kind: ServiceIntentions
-metadata:
   name: payments
   namespace: default
 # Allow traffic from public-api to payments

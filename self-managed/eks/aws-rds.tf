@@ -2,11 +2,15 @@ data "aws_db_instance" "database" {
   db_instance_identifier = aws_db_instance.database.identifier
 }
 
+################################################################################
+# AWS RDS
+################################################################################
+
 resource "aws_db_instance" "database" {
   identifier           = local.name
   allocated_storage    = 6
   engine               = "postgres"
-  engine_version       = var.postgres_version
+  engine_version       = "14"
   instance_class       = "db.t4g.small"
   db_name              = "products"
   username             = "postgres"
@@ -20,6 +24,12 @@ resource "aws_db_instance" "database" {
 
   depends_on = [module.vpc, module.security_group]
 }
+
+################################################################################
+# PostgreSQL 
+################################################################################
+
+
 
 ################################################################################
 # Supporting Resources
