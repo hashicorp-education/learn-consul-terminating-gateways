@@ -8,7 +8,7 @@ data "aws_db_instance" "database" {
 
 resource "aws_db_instance" "database" {
   identifier           = local.name
-  allocated_storage    = 6
+  allocated_storage    = 1
   engine               = "postgres"
   engine_version       = "14"
   instance_class       = "db.t4g.small"
@@ -26,12 +26,6 @@ resource "aws_db_instance" "database" {
 }
 
 ################################################################################
-# PostgreSQL 
-################################################################################
-
-
-
-################################################################################
 # Supporting Resources
 ################################################################################
 
@@ -43,7 +37,7 @@ module "security_group" {
   description = "PostgreSQL security group"
   vpc_id      = module.vpc.vpc_id
 
-  # ingress
+  # ingress only - no egress traffic defined
   ingress_with_cidr_blocks = [
     {
       from_port   = 5432
