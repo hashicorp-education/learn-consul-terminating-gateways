@@ -8,10 +8,10 @@ data "aws_db_instance" "database" {
 
 resource "aws_db_instance" "database" {
   identifier           = local.name
-  allocated_storage    = 1
+  allocated_storage    = 6
   engine               = "postgres"
   engine_version       = "14"
-  instance_class       = "db.t4g.small"
+  instance_class       = "db.m5d.large"
   db_name              = "products"
   username             = "postgres"
   password             = "password"
@@ -47,4 +47,12 @@ module "security_group" {
       cidr_blocks = module.vpc.vpc_cidr_block
     },
   ]
+}
+
+################################################################################
+# Outputs
+################################################################################
+
+output "aws_rds_endpoint" {
+  value = data.aws_db_instance.database.address
 }

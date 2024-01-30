@@ -1,11 +1,6 @@
-data "aws_availability_zones" "available" {
-  state = "available"
-
-  filter {
-    name   = "opt-in-status"
-    values = ["opt-in-not-required"]
-  }
-}
+################################################################################
+# AWS VPC
+################################################################################
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -32,5 +27,33 @@ module "vpc" {
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.name}" = "shared"
     "kubernetes.io/role/internal-elb"     = 1
+  }
+}
+
+################################################################################
+# Supporting resources
+################################################################################
+
+data "aws_availability_zones" "available" {
+  state = "available"
+
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
+
+################################################################################
+# Outputs
+################################################################################
+
+output "region" {
+  value = var.vpc_region
+}
+
+output "vpc" {
+  value = {
+    vpc_id         = module.vpc.vpc_id
+    vpc_cidr_block = module.vpc.vpc_cidr_block
   }
 }

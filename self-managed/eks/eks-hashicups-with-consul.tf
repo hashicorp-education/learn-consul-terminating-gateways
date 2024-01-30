@@ -1,3 +1,7 @@
+################################################################################
+# Kubernetes resources for HashiCups
+################################################################################
+
 data "kubectl_path_documents" "docs" {
     pattern = "${path.module}/hashicups/*.yaml"
 }

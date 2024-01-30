@@ -5,16 +5,7 @@ terraform apply --auto-approve
 # Connect to EKS
 aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw kubernetes_cluster_id)
 
-# do this after RDS is created to import hashicups data: 
-1. kubectl exec --stdin --tty deploy/postgres -- /bin/sh
-2. su
-3. apt update
-4. apt install vim
-5. vim dbexport.pgsql
-6. copy in all the data from config/dbexport.pgsql
-7. save the file
-8. psql --host=learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com --port=5432 --username=postgres --dbname=products < dbexport.pgsql
-9. (the password is password)
+# Run the AWS Lambda function to import HashiCups DB data: 
 
 # Ensure all services are up and running successfully
 kubectl get pods --namespace consul && kubectl get pods --namespace default
@@ -39,7 +30,7 @@ terraform output -raw aws_rds_endpoint
 
 # Put private DNS address in config/external-service.json and save the file
 
-# Register AWS RDS as a service in Consul
+# Register managed-aws-rds as a service in Consul
 consul services register config/external-service.json
 OR
 curl -k \
@@ -48,26 +39,27 @@ curl -k \
     --header "X-Consul-Token: $CONSUL_HTTP_TOKEN" \
     $CONSUL_HTTP_ADDR/v1/catalog/register
 
-# Create service defaults (this creates the virtual service)
+# Create service defaults for managed-aws-rds (this creates the virtual service in Consul)
 kubectl apply --filename config/service-defaults.yaml
 
-# Create ACL policy
+# Create ACL policy (this allows TGW to communicate with managed-aws-rds)
 consul acl policy create -name "managed-aws-rds-write-policy" -rules @config/write-acl-policy.hcl
 
-# Obtain ID of terminating gateway role
+# Obtain the ID of the TGW role (USE ENVIRONMENT VARIABLE HERE INSTEAD OF DEPENDING ON COPY/PASTE)
 consul acl role list -format=json | jq --raw-output '[.[] | select(.Name | endswith("-terminating-gateway-acl-role"))] | if (. | length) == 1 then (. | first | .ID) else "Unable to determine the role ID because there are multiple roles matching this name.\n" | halt_error end'
 
-# Update terminating GW with new ACL policy
-consul acl role update -id <role id> -policy-name managed-aws-rds-write-policy
-consul acl role update -id f3831db4-b2b1-1af5-c312-a780d29cf244 -policy-name managed-aws-rds-write-policy
+# Attach the new ACL policy to the TGW role
+consul acl role update -id $TGW_ACL_ROLE_ID -policy-name managed-aws-rds-write-policy
+consul acl role update -id 4eea10a8-c873-592b-1ac3-44b750edb70d -policy-name managed-aws-rds-write-policy
 
-# Apply terminating gateway configuration
+# Apply TGW configuration (this links managed-aws-rds to TGW)
 kubectl apply --filename config/terminating-gateway.yaml
 
-# Create intention to allow communication from product-api to AWS RDS instance
+# Create an intention (this allows communication from product-api to managed-aws-rds)
 kubectl apply --filename config/service-intentions.yaml
 
-# Redeploy product-api with new managed AWS RDS transparent proxy address
+# Explore hashicups/product-api.yaml to see the database configuration string
+# Redeploy product-api with the managed-aws-rds.virtual.consul address
 kubectl delete -f hashicups/product-api.yaml && \
 kubectl apply -f hashicups/product-api.yaml
 

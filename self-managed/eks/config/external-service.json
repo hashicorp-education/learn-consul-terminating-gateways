@@ -1,6 +1,6 @@
 {
     "Node": "AWS RDS",
-    "Address": "learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com",
+    "Address": "YOUR_UNIQUE_AWS_RDS_ENDPOINT.rds.amazonaws.com",
     "NodeMeta": {
       "external-node": "true",
       "external-probe": "true"

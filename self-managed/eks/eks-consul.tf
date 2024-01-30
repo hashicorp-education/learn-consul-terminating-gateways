@@ -1,3 +1,7 @@
+################################################################################
+# Kubernetes resources for Consul
+################################################################################
+
 # Create consul namespace
 resource "kubernetes_namespace" "consul" {
   metadata {
