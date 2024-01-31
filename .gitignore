@@ -33,3 +33,4 @@ kubeconfig_*
 *_config
 *.mdx
 ca.crt
+builds

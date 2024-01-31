@@ -1,6 +1,6 @@
 {
     "Node": "AWS RDS",
-    "Address": "YOUR_UNIQUE_AWS_RDS_ENDPOINT.rds.amazonaws.com",
+    "Address": "$AWS_RDS_ENDPOINT",
     "NodeMeta": {
       "external-node": "true",
       "external-probe": "true"
@@ -23,7 +23,7 @@
           ],
         "Definition": {
           "Method": "GET",
-          "TCP": "learn-consul-7fqh.cvjehh8zzfhg.us-west-2.rds.amazonaws.com:5432",
+          "TCP": "$AWS_RDS_ENDPOINT:5432",
           "Interval": "5s",
           "Timeout": "1s",
           "DeregisterCriticalServiceAfter": "30s"

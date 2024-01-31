@@ -26,13 +26,13 @@ consul catalog services
 consul-k8s upgrade -config-file=helm/consul-v2-terminating-gw.yaml
 
 # Get the AWS RDS private DNS address
-terraform output -raw aws_rds_endpoint
+export AWS_RDS_ENDPOINT=$(terraform output -raw aws_rds_endpoint) && \
+echo $AWS_RDS_ENDPOINT
 
 # Put private DNS address in config/external-service.json and save the file
+envsubst < config/external-service.template > config/external-service.json
 
 # Register managed-aws-rds as a service in Consul
-consul services register config/external-service.json
-OR
 curl -k \
     --request PUT \
     --data @config/external-service.json \
@@ -46,11 +46,12 @@ kubectl apply --filename config/service-defaults.yaml
 consul acl policy create -name "managed-aws-rds-write-policy" -rules @config/write-acl-policy.hcl
 
 # Obtain the ID of the TGW role (USE ENVIRONMENT VARIABLE HERE INSTEAD OF DEPENDING ON COPY/PASTE)
-consul acl role list -format=json | jq --raw-output '[.[] | select(.Name | endswith("-terminating-gateway-acl-role"))] | if (. | length) == 1 then (. | first | .ID) else "Unable to determine the role ID because there are multiple roles matching this name.\n" | halt_error end'
+export TGW_ACL_ROLE_ID=$(consul acl role list -format=json | jq --raw-output '[.[] | select(.Name | endswith("-terminating-gateway-acl-role"))] | if (. | length) == 1 then (. | first | .ID) else "Unable to determine the role ID because there are multiple roles matching this name.\n" | halt_error end')
 
 # Attach the new ACL policy to the TGW role
-consul acl role update -id $TGW_ACL_ROLE_ID -policy-name managed-aws-rds-write-policy
-consul acl role update -id 4eea10a8-c873-592b-1ac3-44b750edb70d -policy-name managed-aws-rds-write-policy
+consul acl role update -id $TGW_ACL_ROLE_ID \
+                       -datacenter "dc1" \
+                       -policy-name managed-aws-rds-write-policy
 
 # Apply TGW configuration (this links managed-aws-rds to TGW)
 kubectl apply --filename config/terminating-gateway.yaml

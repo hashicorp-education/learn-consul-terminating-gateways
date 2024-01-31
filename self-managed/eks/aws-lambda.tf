@@ -28,23 +28,20 @@ module "lambda_function" {
   depends_on = [aws_db_instance.database]
 }
 
-
 ################################################################################
 # AWS Lambda invokation
 ################################################################################
 
-data "aws_lambda_invocation" "database_init" {
+resource "aws_lambda_invocation" "database_init" {
   function_name = module.lambda_function.lambda_function_name
 
-  input = <<JSON
-    {
-    "key": "db-init"
-    }
-    JSON
+  input = jsonencode({
+    key = "db-init"
+  })
 
-    depends_on = [module.lambda_function] 
-  }
+  depends_on = [module.lambda_function] 
+}
 
 output "aws_lambda_result" {
-  value = data.aws_lambda_invocation.database_init.result
+  value = jsondecode(aws_lambda_invocation.database_init.result)
 }
