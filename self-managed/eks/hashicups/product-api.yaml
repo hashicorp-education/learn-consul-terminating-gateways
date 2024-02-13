@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap
+  namespace: default
+data:
+  config: |
+    {
+      "db_connection": "host=RDS_VIRTUAL_DNS port=5432 user=postgres password=password dbname=products sslmode=disable",
+      "bind_address": ":9090",
+      "metrics_address": ":9103"
+    }
 ---
 apiVersion: v1
 kind: Service
@@ -30,19 +42,6 @@ metadata:
   namespace: default
 spec:
   protocol: "http"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: db-configmap
-  namespace: default
-data:
-  config: |
-    {
-      "db_connection": "host=managed-aws-rds.virtual.consul port=5432 user=postgres password=password dbname=products sslmode=disable",
-      "bind_address": ":9090",
-      "metrics_address": ":9103"
-    }
 ---
 apiVersion: apps/v1
 kind: Deployment

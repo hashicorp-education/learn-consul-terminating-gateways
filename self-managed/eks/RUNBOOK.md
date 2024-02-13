@@ -25,6 +25,10 @@ consul catalog services
 # Update Helm chart
 consul-k8s upgrade -config-file=helm/consul-v2-terminating-gw.yaml
 
+# Go to API gateway URL and explore HashiCups (broken state)
+export CONSUL_APIGW_ADDR=http://$(kubectl get svc/api-gateway -o json | jq -r '.status.loadBalancer.ingress[0].hostname') && \
+echo $CONSUL_APIGW_ADDR
+
 # Get the AWS RDS private DNS address
 export AWS_RDS_ENDPOINT=$(terraform output -raw aws_rds_endpoint) && \
 echo $AWS_RDS_ENDPOINT
@@ -41,6 +45,9 @@ curl -k \
 
 # Create service defaults for managed-aws-rds (this creates the virtual service in Consul)
 kubectl apply --filename config/service-defaults.yaml
+
+# Confirm virtual service Consul DNS resolution
+kubectl exec -it svc/consul-server --namespace consul -- /bin/sh -c "nslookup -port=8600 managed-aws-rds.virtual.consul 127.0.0.1"
 
 # Create ACL policy (this allows TGW to communicate with managed-aws-rds)
 consul acl policy create -name "managed-aws-rds-write-policy" -rules @config/write-acl-policy.hcl
